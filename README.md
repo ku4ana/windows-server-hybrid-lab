@@ -24,27 +24,32 @@ The purpose of this lab is hands-on preparation for the Windows Server Hybrid Ad
 ## Architecture Overview
 
 ### Logical Design
-                     Internet
-                         |
-                      pfSense
-             -------------------------
-             |           |           |
-            LAN1        LAN2      NAT/WAN
-             |           |
-       Forest A       Forest B
-      (lab.local)   (lab2.local)
+                              Internet
+                                 │
+                          [ pfSense Firewall ]
+                                 │
+            ┌────────────────────┼────────────────────┐
+            │                    │                    │
+     192.168.100.0/24     192.168.101.0/24       OpenVPN Tunnel
+        (Forest 1)            (Forest 2)          10.10.10.0/24
+            │                    │                    │
+     ┌──────┼────────┐           │                    │
+     │      │        │           │                    │
+    DC1    FS1     SYNC1        DC2              Remote Win11 VM
+ (AD/DNS) (File) (NPS+Entra) (AD/DNS)           (Non-domain client)
 
 ### Server Layout
 Forest A (lab.local)
 - DC1 (Domain Controller, DHCP, DNS)
 - FS1 (File Server)
-- SYNC01 (Microsoft Entra Connect)
+- SYNC01 (Microsoft Entra Connect,NPS)
 - Windows 11 Client (Domain Joined)
+- Windows 11 Remote Client(Not-Domain joined, VPN connected)
 
 Forest B (lab2.local)
 - DC2 (Domain Controller, DHCP, DNS)
 
-Network Routing handled by pfSense VM
+Network Routing and DNS filtering handled by pfSense VM
 
 ---
 
@@ -119,13 +124,15 @@ Network Routing handled by pfSense VM
 
 ## Skills Demonstrated
 
-- Active Directory deployment and management
-- Multi-forest trust configuration
-- Group Policy design and troubleshooting
-- Hybrid identity implementation
-- DNS and network troubleshooting
-- Role separation and infrastructure design
-- Identity architecture understanding
+- Deployed two-forest AD infrastructure with two-way forest trust
+- Configured conditional forwarders for cross-forest name resolution
+- Implemented Group Policy inheritance and loopback processing
+- Resolved routing instability caused by multiple default gateways
+- Deployed OpenVPN with certificate + RADIUS authentication
+- Integrated NPS with AD for VPN authorization
+- Configured DNSBL filtering for remote VPN clients
+- Implemented Microsoft Entra Connect (PHS + Seamless SSO)
+- Simulated external remote client access (non-domain joined VM
 
 ---
 
