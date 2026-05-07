@@ -16,6 +16,10 @@ The lab simulates a small enterprise infrastructure including:
 - Password Hash Synchronization (PHS)
 - Seamless Single Sign-On (SSO)
 - pfSense virtual routing and network segmentation
+- Created server and client certificates for OpenVPN; configured pfBlockerNG to restrict domain access for VPN users.
+- Configured NPS policies to allow AD group authentication for VPN (RADIUS client).
+- Joined Cloud_Client to Entra ID and enrolled it in Intune; created Configuration Profiles, Compliance Policies, Conditional Access and Update policies.
+- Deployed Office 365 and Win32 applications via Intune for testing app deployment workflows.
 
 The purpose of this lab is hands-on preparation for the Windows Server Hybrid Administrator Associate certification and to gain practical infrastructure administration experience.
 
@@ -23,33 +27,25 @@ The purpose of this lab is hands-on preparation for the Windows Server Hybrid Ad
 
 ## Architecture Overview
 
-### Logical Design
-                              Internet
-                                 │
-                          [ pfSense Firewall ]
-                                 │
-            ┌────────────────────┼────────────────────┐
-            │                    │                    │
-     192.168.100.0/24     192.168.101.0/24       OpenVPN Tunnel
-        (Forest 1)            (Forest 2)          10.10.10.0/24
-            │                    │                    │
-     ┌──────┼────────┐           │                    │
-     │      │        │           │                    │
-    DC1    FS1     SYNC1        DC2              Remote Win11 VM
- (AD/DNS) (File) (NPS+Entra) (AD/DNS)           (Non-domain client)
 
 ### Server Layout
-Forest A (lab.local)
-- DC1 (Domain Controller, DHCP, DNS)
-- FS1 (File Server)
-- SYNC01 (Microsoft Entra Connect,NPS)
-- Windows 11 Client (Domain Joined)
-- Windows 11 Remote Client(Not-Domain joined, VPN connected)
 
-Forest B (lab2.local)
-- DC2 (Domain Controller, DHCP, DNS)
+DC1 — Domain Controller for Test Domain 1; DNS and DHCP for the subnet; provides trust to DC2.
 
-Network Routing and DNS filtering handled by pfSense VM
+DC2 — Domain Controller for Test Domain 2 in a separate forest; DNS and DHCP for its subnet; provides trust to DC1.
+
+FS1 — File server for Test Domain 1; stores shared data and system state backups for DC1.
+
+WIN11 — Domain‑joined client used for GPO testing and production scenario simulation.
+
+Remote_WIN11 — Non‑domain client using NAT; connects to Test Domain 1 resources via OpenVPN.
+
+Router1 (pfSense) — Gateway with three interfaces (WAN, LAN1, LAN2); provides internet, OpenVPN access and domain filtering via pfBlockerNG.
+
+SYNC1 — Entra Connect server; synchronizes on‑prem users and groups to the Entra tenant; provides PHS and Seamless SSO; hosts NPS (RADIUS) for VPN authentication.
+
+Cloud_Client — Intune‑managed client joined to Entra ID; used to test Configuration Profiles, Compliance, Conditional Access and App Deployment.
+
 
 ---
 
@@ -102,11 +98,11 @@ Network Routing and DNS filtering handled by pfSense VM
 
 ## Networking
 
-- Deployed pfSense as virtual router
-- Configured:
-  - Default gateways
-  - Firewall rules
-- Enabled internet access for isolated lab networks
+- Segmented network with WAN, LAN1 and LAN2 interfaces on pfSense to isolate test domains and simulate multi‑subnet production environments.
+- Each domain controller serves DNS and DHCP for its subnet; Conditional Forwarders and Reverse Lookup zones configured for cross‑domain name resolution.
+- OpenVPN server on pfSense provides secure remote access; client profiles exported and tested on Remote_WIN11.
+- NPS (RADIUS) configured to allow AD group authentication for VPN users, enabling centralized access control.
+- pfSense enforces routing between subnets and internet access; pfBlockerNG used to restrict domain access for VPN users and simulate policy enforcement.
 
 ---
 
@@ -119,7 +115,8 @@ Network Routing and DNS filtering handled by pfSense VM
 - Entra Connect schema permission errors
 - MFA registration and authentication flow issues
 - IPv6 DNS interference with Entra synchronization
-
+- Assigning product licenses to users in Entra ID
+- Resolving conflicts with Intune compliance and configuration policies
 ---
 
 ## Skills Demonstrated
@@ -132,7 +129,10 @@ Network Routing and DNS filtering handled by pfSense VM
 - Integrated NPS with AD for VPN authorization
 - Configured DNSBL filtering for remote VPN clients
 - Implemented Microsoft Entra Connect (PHS + Seamless SSO)
-- Simulated external remote client access (non-domain joined VM
+- Simulated external remote client access (non-domain joined VM)
+- Creating users; Assigning permissions in Active Directory and roles in Entra ID
+- Creating and assinging Conditional Access policies in Entra ID
+- Creating and assigning compliance, configuration, update policies in Intune MDM
 
 ---
 
@@ -140,19 +140,21 @@ Network Routing and DNS filtering handled by pfSense VM
 
 - VMware Workstation Pro
 - Windows Server 2025
-- Windows 11
-- pfSense
-- Microsoft Entra ID
-- Microsoft Entra Connect
+- Windows 11 Pro
+- pfSense (with OpenVPN and pfBlockerNG)
+- Entra ID and Entra Connect
+- Microsoft Intune MDM
+- NPS (RADIUS)
 - PowerShell (basic administrative commands)
 
 ---
 
 ## Project Goal
+# Purpose
 
-To build a realistic hybrid enterprise lab environment to strengthen hands-on skills in:
+Provide a compact, reproducible hybrid lab that simulates a small production environment for hands‑on testing of identity, networking and device management scenarios.
 
-- Identity management
-- Hybrid cloud integration
-- Infrastructure design
-- Windows Server administration
+# Objectives
+
+- Validate AD and DNS interactions across trusted forests, test Group Policy deployment and client configuration, and demonstrate secure remote access workflows.
+- Exercise hybrid identity flows by synchronizing on‑prem users to Entra ID and managing cloud‑joined devices with Intune.
