@@ -26,7 +26,7 @@ The purpose of this lab is hands-on preparation for the Windows Server Hybrid Ad
 ---
 
 ## Architecture Overview
-
+_*Full Diagram is shown in_ **Hybrid Windows Server Infrastructure Lab.png** _in the same repository. The shown IP addresses are exemplary._
 
 ### Server Layout
 
