@@ -150,11 +150,11 @@ Cloud_Client — Intune‑managed client joined to Entra ID; used to test Config
 ---
 
 ## Project Goal
-# Purpose
+### Purpose
 
 Provide a compact, reproducible hybrid lab that simulates a small production environment for hands‑on testing of identity, networking and device management scenarios.
 
-# Objectives
+### Objectives
 
 - Validate AD and DNS interactions across trusted forests, test Group Policy deployment and client configuration, and demonstrate secure remote access workflows.
 - Exercise hybrid identity flows by synchronizing on‑prem users to Entra ID and managing cloud‑joined devices with Intune.
